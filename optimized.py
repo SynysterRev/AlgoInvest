@@ -45,7 +45,6 @@ def load_action_info():
 def get_best_invest(actions):
     n = len(actions)
     matrix = [[0 for _ in range(BUDGET + 1)] for _ in range(n + 1)]
-    min_cost = actions[0].cost
     # use knapsack algorithm to calculate the best profit
     for i in range(1, n + 1):
         for j in range(1, BUDGET + 1):
