@@ -2,11 +2,11 @@ import csv
 import time
 
 BUDGET = 500
-actions_cost = []
+
 
 class Action:
-    def __init__(self, number, cost, percent_profit):
-        self.number = number
+    def __init__(self, name, cost, percent_profit):
+        self.name = name
         self.cost = cost
         self.percent_profit = percent_profit
         self.profit = self.calculate_profit()
@@ -15,16 +15,18 @@ class Action:
         return round(self.cost * self.percent_profit, 2)
 
     def __str__(self):
-        return f"L'action {self.number} coûte {self.cost}€ et rapportera {self.profit}€ au bout de 2 ans."
+        return f"L'action {self.name} coûte {self.cost}€ et rapportera {self.percent_profit}€ au bout de 2 ans."
 
     def __repr__(self):
-        return str(self.number)
+        return str(self.name)
 
     def __lt__(self, other):
         return self.cost < other.cost
 
+
 def convert_percent_to_float(percent):
     return float(percent[:-1]) / 100
+
 
 def load_action_info():
     try:
@@ -33,75 +35,49 @@ def load_action_info():
             reader = csv.reader(f)
             next(reader)
             for line in reader:
-                action = Action(line[0].split("-")[-1], int(line[1]), convert_percent_to_float(line[2]))
+                action = Action(line[0], int(line[1]), convert_percent_to_float(line[2]))
                 actions.append(action)
         return actions
     except FileNotFoundError:
         print("File not found")
         return []
 
-def calculate_best_invest(combinations, actions):
-    best_invest = None
-    best_profit = 0
-    for c in combinations:
-        for result in c:
-            profit = sum(actions[index].profit for index in result)
-            if best_profit < profit:
-                best_invest = result
-                best_profit = profit
-
-    return best_invest
-
-def generate_combinations(actions, subset_length, best_profit):
-    def combine(start, subset, total_cost, best_profit):
-        if len(subset) == subset_length:
-            # profit = sum(actions[index].profit for index in subset)
-            # if best_profit < profit:
-            #     best_profit = profit
-            result.append(list(subset))
-            return best_profit
-        for j in range(start, len(actions)):
-            cost = actions_cost[j] + total_cost
-            if cost <= BUDGET:
-                subset.append(j)
-                best_profit = combine(j + 1, subset, cost, best_profit)
-                subset.pop()
+def get_best_invest(actions):
+    n = len(actions)
+    matrix = [[0 for _ in range(BUDGET + 1)] for _ in range(n + 1)]
+    min_cost = actions[0].cost
+    # use knapsack algorithm to calculate the best profit
+    for i in range(1, n + 1):
+        for j in range(1, BUDGET + 1):
+            if actions[i - 1].cost <= j:
+                matrix[i][j] = max(matrix[i - 1][j], matrix[i-1][j-actions[i - 1].cost] + actions[i - 1].profit)
             else:
-                return best_profit
+                matrix[i][j] = matrix[i - 1][j]
 
     result = []
-    best_profit = combine(0, [], 0, best_profit)
-    return result, best_profit
-
+    current_budget = BUDGET
+    number_actions = len(actions)
+    # from the best profit loop until we get all the actions used to calculate it
+    while current_budget >= 0 and number_actions >= 0 :
+        if matrix[number_actions][current_budget] != matrix[number_actions - 1][current_budget]:
+            result.append(actions[number_actions - 1])
+            current_budget -= actions[number_actions - 1].cost
+        number_actions -= 1
+    return matrix[n][BUDGET], result
 
 
 def main():
     start_time = time.time()
     actions = load_action_info()
     actions.sort()
-    for i in range(len(actions)):
-        actions_cost.append(actions[i].cost)
-    total_cost = 0
-    max_length = 0
 
-    # reduce length of combinations
-    for i in range(len(actions_cost)):
-        total_cost += actions_cost[i]
-        if total_cost > BUDGET:
-            max_length = i
-            break
+    best_profit, result = get_best_invest(actions)
+    total_cost = sum(action.cost for action in result)
+    print("--- %s seconds end ---" % (time.time() - start_time))
+    print("Meilleur investissement = ", result)
+    print("Coût total = ", total_cost)
+    print("Bénéfice total = ", best_profit)
 
-    combinations = []
-    best_profit = 0
-    for subset_length in range(1, max_length + 1):
-        result, best_profit = generate_combinations(actions, subset_length, best_profit)
-        combinations.append(result)
-
-    best_invest = calculate_best_invest(combinations, actions)
-    print("Meilleur investissement = ", best_invest)
-    print("Coût total = ", sum(actions[index].cost for index in best_invest))
-    print("Bénéfice total = ", sum(actions[index].profit for index in best_invest))
-    print("--- %s seconds ---" % (time.time() - start_time))
 
 if __name__ == '__main__':
     main()
