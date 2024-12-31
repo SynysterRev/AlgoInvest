@@ -1,5 +1,6 @@
 import csv
 import time
+import timeit
 
 BUDGET = 500
 
@@ -35,7 +36,7 @@ def convert_percent_to_float(percent):
 def load_action_info():
     try:
         actions = []
-        with open('data/action_info.csv', 'r') as f:
+        with open('data/data_set_1.csv', 'r') as f:
             reader = csv.reader(f)
             next(reader)
             for line in reader:
@@ -74,6 +75,7 @@ def get_best_invest(actions):
         number_actions -= 1
     return matrix[n][budget_int], result
 
+
 def knap_sack_memory_opti(actions):
     n = len(actions)
     precision = 100
@@ -83,6 +85,7 @@ def knap_sack_memory_opti(actions):
     trace = [[] for _ in range(budget_int + 1)]
     for i in range(1, n + 1):
         action_cost = int(actions[i - 1].cost * precision)
+        # loop backward because it allows us to keep track of the "previous line" before updating the values
         for j in range(budget_int, 0, -1):
             if action_cost <= j:
                 if dp[j - action_cost] + actions[i - 1].profit > dp[j]:
@@ -108,7 +111,28 @@ def main():
     print("Meilleur investissement = ", result)
     print("Coût total = ", total_cost)
     print("Bénéfice total = ", best_profit)
+    print("Rendement global = ", round(best_profit / total_cost * 100, 2), "%")
+
+
+def knapsack_time():
+    SETUP_CODE = '''
+from __main__ import knap_sack_memory_opti
+from __main__ import load_action_info
+    '''
+
+    TEST_CODE = '''
+actions = load_action_info()
+actions.sort()
+best_profit, result = knap_sack_memory_opti(actions)
+    '''
+    times = timeit.repeat(setup=SETUP_CODE,
+                          stmt=TEST_CODE,
+                          repeat=100,
+                          number=1)
+    print(times)
+    print("Temps moyen exécution : ", sum(t for t in times) / len(times))
 
 
 if __name__ == '__main__':
     main()
+    knapsack_time()
