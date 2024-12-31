@@ -3,6 +3,7 @@ import time
 
 BUDGET = 500
 
+
 class Action:
     def __init__(self, number, cost, percent_profit):
         self.number = number
@@ -19,8 +20,10 @@ class Action:
     def __repr__(self):
         return str(self.number)
 
+
 def convert_percent_to_float(percent):
     return float(percent[:-1]) / 100
+
 
 def load_action_info():
     try:
@@ -36,6 +39,7 @@ def load_action_info():
         print("File not found")
         return []
 
+
 def calculate_best_invest(combinations):
     best_invest = None
     best_profit = 0
@@ -47,6 +51,7 @@ def calculate_best_invest(combinations):
                 best_profit = profit
 
     return best_invest
+
 
 def generate_combinations(actions, subset_length):
     def combine(start, subset):
@@ -60,12 +65,12 @@ def generate_combinations(actions, subset_length):
 
     result = []
     final_result = []
+
     combine(0, [])
     for combination in result:
         if sum(action.cost for action in combination) <= BUDGET:
             final_result.append(combination)
     return final_result
-
 
 
 def main():
@@ -80,6 +85,7 @@ def main():
     print("Coût total = ", sum(action.cost for action in best_invest))
     print("Bénéfice total = ", sum(action.profit for action in best_invest))
     print("--- %s seconds ---" % (time.time() - start_time))
+
 
 if __name__ == '__main__':
     main()
