@@ -16,7 +16,7 @@ class Action:
 
     def __str__(self):
         return (f"L'action {self.name} coûte {self.cost}€ "
-                f"et rapportera {self.percent_profit}€ au bout de 2 ans.")
+                f"et rapportera {self.profit}€ au bout de 2 ans.")
 
     def __repr__(self):
         return str(self.name)
@@ -74,15 +74,37 @@ def get_best_invest(actions):
         number_actions -= 1
     return matrix[n][budget_int], result
 
+def knap_sack_memory_opti(actions):
+    n = len(actions)
+    precision = 100
+    budget_int = int(BUDGET * precision)
+    dp = [0 for _ in range(budget_int + 1)]
+    # use to keep track of selected actions
+    trace = [[] for _ in range(budget_int + 1)]
+    for i in range(1, n + 1):
+        action_cost = int(actions[i - 1].cost * precision)
+        for j in range(budget_int, 0, -1):
+            if action_cost <= j:
+                if dp[j - action_cost] + actions[i - 1].profit > dp[j]:
+                    trace[j] = trace[j - action_cost] + [i - 1]
+                    dp[j] = dp[j - action_cost] + actions[i - 1].profit
+                else:
+                    dp[j] = dp[j]
+
+    selected_actions = [actions[action_index] for action_index in trace[budget_int]]
+    return dp[budget_int], selected_actions
+
 
 def main():
     start_time = time.time()
     actions = load_action_info()
     actions.sort()
-
-    best_profit, result = get_best_invest(actions)
+    best_profit, result = knap_sack_memory_opti(actions)
+    print("--- %s knap sack end ---" % (time.time() - start_time))
+    # start_time = time.time()
+    # best_profit, result = get_best_invest(actions)
     total_cost = sum(action.cost for action in result)
-    print("--- %s seconds end ---" % (time.time() - start_time))
+    # print("--- %s seconds end ---" % (time.time() - start_time))
     print("Meilleur investissement = ", result)
     print("Coût total = ", total_cost)
     print("Bénéfice total = ", best_profit)
