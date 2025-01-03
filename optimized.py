@@ -47,35 +47,6 @@ def load_action_info():
         print("File not found")
         return []
 
-
-def get_best_invest(actions):
-    n = len(actions)
-    precision = 100
-    budget_int = int(BUDGET * precision)
-    matrix = [[0 for _ in range(budget_int + 1)] for _ in range(n + 1)]
-    # use knapsack algorithm to calculate the best profit
-    for i in range(1, n + 1):
-        action_cost = int(actions[i - 1].cost * precision)
-        for j in range(1, budget_int + 1):
-            if action_cost <= j:
-                matrix[i][j] = max(matrix[i - 1][j],
-                                   matrix[i - 1][j - int(actions[i - 1].cost * precision)] +
-                                   actions[i - 1].profit)
-            else:
-                matrix[i][j] = matrix[i - 1][j]
-
-    result = []
-    current_budget = budget_int
-    number_actions = len(actions)
-    # from the best profit loop until we get all the actions used to calculate it
-    while current_budget >= 0 and number_actions >= 0:
-        if matrix[number_actions][current_budget] != matrix[number_actions - 1][current_budget]:
-            result.append(actions[number_actions - 1])
-            current_budget -= int(actions[number_actions - 1].cost * precision)
-        number_actions -= 1
-    return matrix[n][budget_int], result
-
-
 def knap_sack_memory_opti(actions):
     n = len(actions)
     precision = 100
@@ -131,4 +102,4 @@ best_profit, result = knap_sack_memory_opti(actions)
 
 if __name__ == '__main__':
     main()
-    knapsack_time()
+    # knapsack_time()
