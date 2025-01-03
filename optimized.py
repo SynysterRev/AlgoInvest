@@ -104,10 +104,7 @@ def main():
     actions.sort()
     best_profit, result = knap_sack_memory_opti(actions)
     print("--- %s knap sack end ---" % (time.time() - start_time))
-    # start_time = time.time()
-    # best_profit, result = get_best_invest(actions)
     total_cost = sum(action.cost for action in result)
-    # print("--- %s seconds end ---" % (time.time() - start_time))
     print("Meilleur investissement = ", result)
     print("Coût total = ", total_cost)
     print("Bénéfice total = ", best_profit)
@@ -129,7 +126,6 @@ best_profit, result = knap_sack_memory_opti(actions)
                           stmt=TEST_CODE,
                           repeat=100,
                           number=1)
-    print(times)
     print("Temps moyen exécution : ", sum(t for t in times) / len(times))
 
 
