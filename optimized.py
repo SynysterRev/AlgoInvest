@@ -62,8 +62,6 @@ def knap_sack_memory_opti(actions):
                 if dp[j - action_cost] + actions[i - 1].profit > dp[j]:
                     trace[j] = trace[j - action_cost] + [i - 1]
                     dp[j] = dp[j - action_cost] + actions[i - 1].profit
-                else:
-                    dp[j] = dp[j]
 
     selected_actions = [actions[action_index] for action_index in trace[budget_int]]
     return dp[budget_int], selected_actions
